@@ -22,7 +22,7 @@ public class ReportController {
 
         return ResponseEntity.ok()
                 .contentType(MediaType.APPLICATION_PDF)
-                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=salary_report_" + employeeId + ".pdf")
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=salary_receipt_" + employeeId + ".pdf")
                 .body(pdfBytes);
     }
 }
