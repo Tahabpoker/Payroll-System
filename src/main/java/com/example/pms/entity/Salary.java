@@ -23,10 +23,10 @@ public class Salary {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)  // Auto-generated primary key
     @Column(name = "salary_id")  // Column name in the database
-    private Long salaryId;
+    private Integer salaryId;
 
     @Column(name = "employee_id")  // Column name in the database
-    private Long employeeId;
+    private Integer employeeId;
 
     @Column(name = "basic_salary")  // Column name in the database
     private BigDecimal basicSalary;

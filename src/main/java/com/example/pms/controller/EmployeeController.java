@@ -5,6 +5,7 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -18,6 +19,7 @@ import com.example.pms.entity.Employee;
 import com.example.pms.service.EmployeeService;
 import com.example.pms.utility.Messenger;
 
+@CrossOrigin("*")
 @RestController
 @RequestMapping("/employees")
 public class EmployeeController {
@@ -39,11 +41,24 @@ public class EmployeeController {
         return new ResponseEntity<>(employeeService.getAllEmployees(), HttpStatus.OK);
     }
     
-    @PutMapping
-    public ResponseEntity<Employee> updateEmployee(@RequestBody Employee employee){
-    	return new ResponseEntity<>(employeeService.save(employee), HttpStatus.OK);
+    @PutMapping("/{id}")
+    public ResponseEntity<Object> updateEmployee(@PathVariable Integer id, @RequestBody Employee updatedEmployee) {
+        Employee existingEmployee = employeeService.getEmployee(id);
+        if (existingEmployee != null) {
+            existingEmployee.setFirstName(updatedEmployee.getFirstName());
+            existingEmployee.setLastName(updatedEmployee.getLastName());
+            existingEmployee.setDesignation(updatedEmployee.getDesignation());
+            existingEmployee.setDepartment(updatedEmployee.getDepartment());
+            existingEmployee.setSalary(updatedEmployee.getSalary());
+            existingEmployee.setDateOfJoining(updatedEmployee.getDateOfJoining());
+            // Save the updated employee back to the database
+            employeeService.save(existingEmployee);  
+            return new ResponseEntity<>(existingEmployee, HttpStatus.OK);
+        } else {
+            return new ResponseEntity<>(new Messenger("Employee not found"), HttpStatus.NOT_FOUND);
+        }
     }
-    
+
     @DeleteMapping("/{id}")
     public ResponseEntity<Object> deleteEmployee(@PathVariable Integer id) {
         boolean isDeleted = employeeService.deleteEmployee(id);
@@ -54,19 +69,4 @@ public class EmployeeController {
             return new ResponseEntity<>(new Messenger("Employee not found"), HttpStatus.NOT_FOUND);
         }
     }
-    
-//    @PatchMapping("/{id}")
-//    public ResponseEntity<Employee> updateEmployeePartially(@PathVariable Integer id,@RequestBody Map<String,Object> updates){
-//    	Employee employee = employeeService.getEmployee(id);
-//    	updates.forEach((key, value)->{
-//    		Field field = ReflectionUtils.findField(Employee.class, key);
-//    		if(field!=null) {
-//    			field.setAccessible(true);
-//    			ReflectionUtils.setField(field,employee,value);
-//    		}
-//    	});
-//        return new ResponseEntity<>(employeeService.save(employee), HttpStatus.OK);
-//
-//    }
 }
-

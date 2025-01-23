@@ -12,6 +12,7 @@ import com.example.pms.utility.SalaryResponse;
 import java.math.BigDecimal;
 import java.util.List;
 
+@CrossOrigin("*")
 @RestController
 @RequestMapping("/api/salaries")
 public class SalaryController {
@@ -28,40 +29,36 @@ public class SalaryController {
         return salaryService.getSalaryByEmployeeId(employeeId);
     }
     
-    // Endpoint to get salary statistics
-    @GetMapping("/statistics")
-    public SalaryStatistics getSalaryStatistics() {
-        return salaryService.calculateSalaryStatistics();
+    @GetMapping
+    public List<Salary> getAllSalaries(){
+    	return salaryService.getSalaryOfAllEmployees();
     }
     
-    // Monthly Salary
-    /**
-     * Endpoint to calculate monthly salary for an employee.
-     * 
-     * @param employeeId Employee ID
-     * @param month      Month (1-12)
-     * @param year       Year (e.g., 2025)
-     * @return ResponseEntity containing the calculated salary or error
-     */
-    @GetMapping("/salary/monthly")
-    public ResponseEntity<SalaryResponse> getMonthlySalary(@RequestParam Integer employeeId,@RequestParam int month, @RequestParam int year){
-             // Call the service to calculate monthly salary
-             BigDecimal monthlySalary = salaryService.calculateMonthlySalary(employeeId, month, year);
-
-             // Prepare the response object
-             SalaryResponse response = new SalaryResponse(
-                 employeeId,
-                 monthlySalary,
-                 month + "/" + year
-             );
-
-             return ResponseEntity.ok(response); // Return a structured response
+    // Endpoint to get salary statistics for all employees
+    @GetMapping("/statistics")
+    public SalaryStatistics getSalaryStatistics() {
+        return salaryService.calculateSalaryStatistics();  // This returns statistics for all employees
     }
+
+    // Monthly Salary
+    @GetMapping("/salary/monthly")
+    public ResponseEntity<SalaryResponse> getMonthlySalary(@RequestParam Integer employeeId, @RequestParam int month, @RequestParam int year) {
+        // Call the service to calculate monthly salary
+        BigDecimal monthlySalary = salaryService.calculateMonthlySalary(employeeId, month, year);
+
+        // Prepare the response object
+        SalaryResponse response = new SalaryResponse(
+            employeeId,
+            monthlySalary,
+            month + "/" + year
+        );
+
+        return ResponseEntity.ok(response); // Return a structured response
+    }
+
     @GetMapping("/salary/{employeeId}")
     public ResponseEntity<List<Salary>> getSalaryReport(@PathVariable Integer employeeId) {
         List<Salary> salaryReport = salaryService.getSalaryByEmployeeId(employeeId);
         return ResponseEntity.ok(salaryReport);
     }
-
 }
-

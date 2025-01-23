@@ -30,16 +30,20 @@ public class SalaryService {
     
     @Transactional
     public Salary addSalary(Salary salary) {
-    	BigDecimal totalSalary = salary.getBasicSalary().add(salary.getBonus()).subtract(salary.getDeductions());
-    	salary.setTotalSalary(totalSalary);
+        BigDecimal totalSalary = salary.getBasicSalary().add(salary.getBonus()).subtract(salary.getDeductions());
+        salary.setTotalSalary(totalSalary);
         return salaryRepository.save(salary);
     }
 
     public List<Salary> getSalaryByEmployeeId(Integer employeeId) {
         return salaryRepository.findSalaryByEmployeeId(employeeId);
     }
+    
+    public List<Salary> getSalaryOfAllEmployees(){
+    	return salaryRepository.findAll();
+    }
 
-    // Method to calculate salary statistics
+    // Method to calculate salary statistics for all employees
     public SalaryStatistics calculateSalaryStatistics() {
         List<Salary> salaries = salaryRepository.findAll();  // Fetch all salaries
 
@@ -60,12 +64,11 @@ public class SalaryService {
         );
     }
     
-    
     // Method to delete salary by employee ID
-    
     public void deleteSalaryByEmployeeId(Integer employeeId) {
         salaryRepository.deleteByEmployeeId(employeeId);
     }
+
     public BigDecimal calculateTax(BigDecimal salary) {
         BigDecimal tax = BigDecimal.ZERO;
 
@@ -79,7 +82,7 @@ public class SalaryService {
     // Calculate Monthly Salary
     public BigDecimal calculateMonthlySalary(Integer employeeId, int month, int year) {
         List<Attendance> attendances = attendanceRepository.findByEmployeeIdAndMonth(employeeId, month, year);
-     // Fetch the employee's base salary
+        // Fetch the employee's base salary
         BigDecimal baseSalary = employeeRepository.findById(employeeId).orElseThrow(
             () -> new IllegalArgumentException("Employee not found with ID: " + employeeId)
         ).getSalary();
@@ -87,15 +90,12 @@ public class SalaryService {
         // Calculating Daily Salary
         BigDecimal dailySalary = baseSalary.divide(BigDecimal.valueOf(30),RoundingMode.HALF_UP);
         
-        // Calculate totalDeducation
+        // Calculate total Deductions
         BigDecimal totalDeductions = BigDecimal.valueOf(attendances.stream()
-        		.filter(a->"Absent".equalsIgnoreCase(a.getStatus()))
-        		.count()).multiply(dailySalary);
+                .filter(a -> "Absent".equalsIgnoreCase(a.getStatus()))
+                .count()).multiply(dailySalary);
         
         // Calculate Final Salary
         return baseSalary.subtract(totalDeductions);
-        
     }
-
-    
 }
